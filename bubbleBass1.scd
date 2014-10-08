@@ -5,17 +5,17 @@
 var theKickFiles, theBubbleBassFiles, rollFiles; // an array of file names derived using .pathMatch method
 
 // ********************************
-// initialise lists for the buffers
-~theKickBuffers = List.new(0);
-~theBubbleBassBuffers = List.new(0);
-~rollBuffers = List.new(0);
+// initialise Dictionarys for the buffers
+~theKickBuffers = Dictionary.new(0);
+~theBubbleBassBuffers = Dictionary.new(0);
+~rollBuffers = Dictionary.new(0);
 
 // ***********************
 // now get the file arrays
 
-theKickFiles= ("~/SC/DEV/bubblebass/kicks/res*.wav").pathMatch.postln;
-theBubbleBassFiles= ("~/SC/DEV/bubblebass/licks/*.wav").pathMatch.postln;
-rollFiles = ("~/SC/DEV/bubblebass/rolls/*.WAV").pathMatch.postln;
+theKickFiles= ("~/SC/DEV/bubblebass/kicks/res*.wav").pathMatch;
+theBubbleBassFiles= ("~/SC/DEV/bubblebass/licks/*.wav").pathMatch;
+rollFiles = ("~/SC/DEV/bubblebass/rolls/*.WAV").pathMatch;
 
 // **************************************
 // load buffers and organise housekeeping
@@ -31,13 +31,14 @@ CmdPeriod.add({
 		item.free;
  	});
 });
+
 s.waitForBoot({
 	theKickFiles.do({|path, i|
 		Buffer.read(
 			s,
 			path,
 			action:{|buffer|
-				~theKickBuffers.add(buffer);
+				~theKickBuffers.put(path.basename.splitext[0], buffer).postln;
 				if (i == (theKickFiles.size-1),
 					{ "kicks loaded".postln;}
 				); // end if
@@ -51,7 +52,7 @@ s.waitForBoot({
 			s,
 			path,
 			action:{|buffer|
-				~theBubbleBassBuffers.add(buffer);
+				~theBubbleBassBuffers.put(path.basename.splitext[0], buffer);
 				if (i == (theBubbleBassFiles.size-1),
 					{ "bubbleBases loaded".postln;}
 				); // end if
@@ -65,7 +66,7 @@ s.waitForBoot({
 			s,
 			path,
 			action:{|buffer|
-				~rollBuffers.add(buffer);
+				~rollBuffers.put(path.basename.splitext[0], buffer);
 				if (i == (rollFiles.size-1),
 					{ "rolls loaded".postln;}
 				); // end if
@@ -91,6 +92,10 @@ SynthDef(\buffPlayer, {|out=0, bufnum = 0, loop = 0, amp = 0.7,  pan = 0|
 		Out.ar( out, sig);
 }).add; // end synth def
 
+// **************************
+// mkae the desired mixer gui
+
+TwoPFMixerDef.new
 )
 
 

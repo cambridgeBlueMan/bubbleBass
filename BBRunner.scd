@@ -16,9 +16,14 @@ theDir.do({|item, i|
 // clock
 
 var myTempo = TempoClock.new(150/60);
+var pKick, pBass, pRolls; // PBinds
+var kicksArray = Array.newClear(4);
 
-// *************
-// MixerChannels
+// ************************************************************************************
+//                                 MIXER CHANNELS
+// ************************************************************************************
+
+
 
 var chanKick = MixerChannel.newFromDef("kick", \twoPF1X2, s);
 var chanBubbleBass = MixerChannel.newFromDef("bass", \twoPF2X2, s);
@@ -66,32 +71,68 @@ CmdPeriod.add( {
 	MixerChannel.freeAll(s);
 }); // end CmdPeriod
 
-SystemClock.sched(2, {
-Ppar([
-	// kick drums
-	Pbind(
-		\instrument, \buffPlayer,
-		\bufnum, Prand(~theKickBuffers.asArray, inf),
-		\dur,  1,
-		\amp, 0.7,
-		\out, chanKick.inbus.index
-	),
+
+// ************************************************************************************
+//                                 PATTERNS
+// ************************************************************************************
+kicksArray.do({|item, i|
+	kicksArray[i] = ~theKickBuffers.asArray[~theKickBuffers.size.rand.postln]
+});
+kicksArray.postln;
+
+~aliceBuffers = Pseq([
+	~theBubbleBassBuffers["bubblebassA"].postln,
+	~theBubbleBassBuffers["bubblebassBb"],
+	~theBubbleBassBuffers["bubblebassA"],
+	~theBubbleBassBuffers["bubblebassBb"],
+	~theBubbleBassBuffers["bubblebassC"],
+	~theBubbleBassBuffers["bubblebassEb"],
+	~theBubbleBassBuffers["bubblebassF"],
+	~theBubbleBassBuffers["bubblebassC"]
+	//~theBubbleBassBuffers["bubblebassA"],
+	//~theBubbleBassBuffers["bubblebassA"],
+	//~theBubbleBassBuffers["bubblebassA"],
+
+], 4);
+~aliceDurs = Pseq([16,16,16,16,8,4,4,16], inf);
+
+// pattern proxy for the rolls
+~pRollBuffer = PatternProxy.new(~rollBuffers.asArray[1]);
+
+// kick drums
+
+pKick = Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, Pseq(kicksArray, inf),
+	\dur,  1,
+	\amp, 0.7,
+	\out, chanKick.inbus.index
+	);
 	// bubble bass
-	Pbind(
-		\instrument, \buffPlayerStereo,
-		\dur, 32,
-		\bufnum, Prand(~theBubbleBassBuffers.asArray, 3),
+pBass = Pbind(
+		\instrument, \buffPlayerStereo2,
+		\dur, ~aliceDurs, //16,
+		\bufnum, ~aliceBuffers, //Prand(~theBubbleBassBuffers.asArray, 3),
 		\out, chanBubbleBass.inbus.index
-	),
+	);
 	// rolls
-	Pbind(
+pRolls = 	Pbind(
 		\instrument, \buffPlayer,
-		\bufnum, ~rollBuffers.asArray[1],
+		\bufnum, ~pRollBuffer, // ~rollBuffers.asArray[1],
 			\dur,  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],3),
 		\amp, 0.7,
 		\out, chanRoll.inbus.index
-	)
+	);
+
+
+
+SystemClock.sched(2, {
+Ppar([
+	pKick,
+	pBass,
+	pRolls
 ]).play(myTempo);
+
 }); // end clock
 )
 

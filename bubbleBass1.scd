@@ -84,6 +84,18 @@ SynthDef(\buffPlayerStereo, {| out = 0, bufnum = 0 |
     )
 }).add;
 
+// another go at this, this time to enter anywhere and
+// finish anywhere via he use of envelopes
+
+SynthDef(\buffPlayerStereo2, {| out = 0, bufnum = 0, dur = 32|
+    Out.ar(out,
+		PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), doneAction:2)
+		*
+		EnvGen.ar(Env.linen(0.01, dur*0.4, 0.01, 1))
+    )
+}).add;
+
+
 
 // *************
 // buffer player

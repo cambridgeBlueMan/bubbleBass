@@ -119,7 +119,7 @@ pBass = Pbind(
 pRolls = 	Pbind(
 		\instrument, \buffPlayer,
 		\bufnum, ~pRollBuffer, // ~rollBuffers.asArray[1],
-			\dur,  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],3),
+			\dur,  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],8),
 		\amp, 0.7,
 		\out, chanRoll.inbus.index
 	);

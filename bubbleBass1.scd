@@ -26,10 +26,10 @@ CmdPeriod.add({
 	});
 	~theBubbleBassBuffers.do ({|item, i|
 		item.free;
- 	});
+	});
 	~rollBuffers.do ({|item, i|
 		item.free;
- 	});
+	});
 });
 
 s.waitForBoot({

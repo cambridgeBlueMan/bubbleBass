@@ -98,22 +98,13 @@ kicksArray.postln;
 
 // pattern proxy for the rolls
 ~pRollBuffer = PatternProxy.new(~rollBuffers.asArray[1]);
-~rollDur1 =  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],3);
-~rollDur2 = Pseq([Rest(9), 3/2, 1/4, 1/4, 5], 3);
-~rollDur3 = Pseq([
-	1,1, Rest(3/2) , 1/4, 1/4,
-	3.5, 1/4, 1/4], 1);
-~rollDur4 = Pseq([
-	1,1, Rest(3/2) , 1/4, 1/4,
-	2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
-// kick drums
+// roll Patterns
+~rollDurA = Pseq([1,1, Rest(3/2) , 1/4, 1/4], 1);
+~rollDurB = Pseq([3.5, 1/4, 1/4], 1);
+~rollDurC = Pseq([2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
 ~compositeRoll1 = Place([
-	1,1, Rest(3/2) , 1/4, 1/4,
-	[
-		Pseq([3.5, 1/4, 1/4], 1),
-		Pseq([2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1)
-	]
-	], inf);
+	~rollDurA, [~rollDurB, ~rollDurC]
+	], 100);
 
 	pKick = Pbind(
 		\instrument, \buffPlayer,

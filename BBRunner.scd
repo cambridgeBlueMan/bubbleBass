@@ -107,12 +107,17 @@ kicksArray.postln;
 	1,1, Rest(3/2) , 1/4, 1/4,
 	2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
 // kick drums
+
+
+
+~rollDursA = Pseq([1,1, Rest(3/2) , 1/4, 1/4], 1);
+~rollDursB = Pseq([3.5, 1/4, 1/4], 1);
+~rollDursC = Pseq([2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
 ~compositeRoll1 = Place([
-	1,1, Rest(3/2) , 1/4, 1/4,
+	~rollDursA,
 	[
-		Pseq([3.5, 1/4, 1/4], 1),
-		Pseq([2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1)
-	]
+		~rollDursB, ~rollDursC
+		]
 	], inf);
 
 	pKick = Pbind(

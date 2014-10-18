@@ -42,11 +42,11 @@ var master = MixerChannel.newFromDef("master", \mix2x2, s);
 var reverb  = MixerChannel(\rvb, s, 2, 2, level:1,
 	outbus:master,
 	completionFunc: { |chan|
-		"creating reverb synth".postln;
-		chan.playfx({ |outbus|
-			var	sig = In.ar(outbus, 2);  // read from channel's bus
-			FreeVerb2.ar(sig[0], sig[1], 1, 0.6, 0.5)
-		});
+	"creating reverb synth".postln;
+	chan.playfx({ |outbus|
+		var	sig = In.ar(outbus, 2);  // read from channel's bus
+		FreeVerb2.ar(sig[0], sig[1], 1, 0.6, 0.5)
+	});
 });
 var chorus = MixerChannel.new("chorus", s,2,2,outbus:master);
 
@@ -98,16 +98,10 @@ kicksArray.postln;
 
 // pattern proxy for the rolls
 ~pRollBuffer = PatternProxy.new(~rollBuffers.asArray[1]);
-~rollDur1 =  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],3);
-~rollDur2 = Pseq([Rest(9), 3/2, 1/4, 1/4, 5], 3);
-~rollDur3 = Pseq([
-	1,1, Rest(3/2) , 1/4, 1/4,
-	3.5, 1/4, 1/4], 1);
-~rollDur4 = Pseq([
-	1,1, Rest(3/2) , 1/4, 1/4,
-	2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
+
 // kick drums
 
+<<<<<<< HEAD
 
 
 ~rollDursA = Pseq([1,1, Rest(3/2) , 1/4, 1/4], 1);
@@ -126,33 +120,41 @@ kicksArray.postln;
 		\dur,  1,
 		\amp, 0.7,
 		\out, chanKick.inbus.index
+=======
+pKick = Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, Pseq(kicksArray, inf),
+	\dur,  1,
+	\amp, 0.7,
+	\out, chanKick.inbus.index
+>>>>>>> parent of 579c2b6... added a working Place to do an a [b,c] type structure
 	);
 	// bubble bass
-	pBass = Pbind(
+pBass = Pbind(
 		\instrument, \buffPlayerStereo2,
 		\dur, ~aliceDurs, //16,
 		\bufnum, ~aliceBuffers, //Prand(~theBubbleBassBuffers.asArray, 3),
 		\out, chanBubbleBass.inbus.index
 	);
 	// rolls
-	pRolls = 	Pbind(
+pRolls = 	Pbind(
 		\instrument, \buffPlayer,
-		\bufnum, ~pRollBuffer,
-		\dur, ~compositeRoll1,
+		\bufnum, ~pRollBuffer, // ~rollBuffers.asArray[1],
+			\dur,  Pseq([Rest(15), 1/4, 1/4, 1/4, 1/4],3),
 		\amp, 0.7,
 		\out, chanRoll.inbus.index
 	);
 
 
 
-	SystemClock.sched(2, {
-		Ppar([
-			/*pKick,*/
-			pBass,
-			pRolls
-		]).play(myTempo);
+SystemClock.sched(2, {
+Ppar([
+	pKick,
+	pBass,
+	pRolls
+]).play(myTempo);
 
-	}); // end clock
+}); // end clock
 )
 
 

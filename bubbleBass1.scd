@@ -1,98 +1,83 @@
 (
-// ********************************
-// declare the file array variables
 
-var theKickFiles, theBubbleBassFiles, rollFiles; // an array of file names derived using .pathMatch method
+// get the root directory for the app
+var appDir= thisProcess.nowExecutingPath.dirname;
 
-// ********************************
-// initialise Dictionarys for the buffers
-~theKickBuffers = Dictionary.new(0);
-~theBubbleBassBuffers = Dictionary.new(0);
-~rollBuffers = Dictionary.new(0);
+// there will be a folder called "audio", and within that folder there
+// will be a series of directories to hold samples
+// the names of the folder will be in a literal array thus:
 
-// ***********************
-// now get the file arrays
+// add the name of all directories here
 
-theKickFiles= ("~/SC/DEV/bubblebass/kicks/res*.wav").pathMatch;
-theBubbleBassFiles= ("~/SC/DEV/bubblebass/licks/*.wav").pathMatch;
-rollFiles = ("~/SC/DEV/bubblebass/rolls/*.WAV").pathMatch;
 
-// **************************************
-// load buffers and organise housekeeping
+// now the whole job can be done by iterating the ~folders array
+~folders = ["kicks", "licks", "rolls", "leaKick"];
 
-CmdPeriod.add({
-	~theKickBuffers.do ({|item, i|
-		item.free;
-	});
-	~theBubbleBassBuffers.do ({|item, i|
-		item.free;
-	});
-	~rollBuffers.do ({|item, i|
-		item.free;
-	});
-});
+// make a dictionary for pathmatches
+
+~paths = Dictionary.new(0);
+
+// and a dictioary for buffers
+
+~buffers = Dictionary.new(0);
+
+
+// now do the work
 
 s.waitForBoot({
-	theKickFiles.do({|path, i|
-		Buffer.read(
-			s,
-			path,
-			action:{|buffer|
-				~theKickBuffers.put(path.basename.splitext[0], buffer).postln;
-				if (i == (theKickFiles.size-1),
-					{ "kicks loaded".postln;}
-				); // end if
-			} // end action
-		);
-	});
+	// for each folder
+	~folders.do({|folder, i|
+
+		// ******************************************************
+		// make the dictonary to hold the buffers for this folder
+		~buffers[folder] = Dictionary.new(0);
+
+		// get the file names held in the folder into an array
+		~paths[folder] = (appDir ++ "/" ++ "/" ++ folder ++ "/*.*" ).pathMatch;
+
+		// *************************************************************
+		// now iterate the files in this folder and load them to buffers
+		~paths[folder].do({|path, j|
+			Buffer.read(
+				s,
+				path,
+				action:{|buffer|
+					~buffers[folder].put(path.basename.splitext[0], buffer);
+					if (j == (~paths[folder].size-1),
+						{(folder + "is loaded").postln;}
+					); // end if
+				} // end action
+			);
+		});
+
+		// now set up the housekeeping
+		CmdPeriod.add({
+			~buffers[folder].do ({|item, i|
+				item.free;
+			});
+		});
+	}); // end folder do
 }); // end wait for boot
-s.waitForBoot({
-	theBubbleBassFiles.do({|path, i|
-		Buffer.read(
-			s,
-			path,
-			action:{|buffer|
-				~theBubbleBassBuffers.put(path.basename.splitext[0], buffer);
-				if (i == (theBubbleBassFiles.size-1),
-					{ "bubbleBases loaded".postln;}
-				); // end if
-			} // end action
-		);
-	});
-}); // end wait for boot
-s.waitForBoot({
-	rollFiles.do({|path, i|
-		Buffer.read(
-			s,
-			path,
-			action:{|buffer|
-				~rollBuffers.put(path.basename.splitext[0], buffer);
-				if (i == (rollFiles.size-1),
-					{ "rolls loaded".postln;}
-				); // end if
-			} // end action
-		);
-	});
-}); // end wait for boot
+
 
 // *********
 // synthdefs
 
 SynthDef(\buffPlayerStereo, {| out = 0, bufnum = 0 |
-    Out.ar(out,
-        PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), doneAction:2)
-    )
+	Out.ar(out,
+		PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), doneAction:2)
+	)
 }).add;
 
 // another go at this, this time to enter anywhere and
 // finish anywhere via he use of envelopes
 
 SynthDef(\buffPlayerStereo2, {| out = 0, bufnum = 0, dur = 32|
-    Out.ar(out,
+	Out.ar(out,
 		PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), doneAction:2)
 		*
 		EnvGen.ar(Env.linen(0.01, dur*0.4, 0.01, 1))
-    )
+	)
 }).add;
 
 
@@ -101,7 +86,7 @@ SynthDef(\buffPlayerStereo2, {| out = 0, bufnum = 0, dur = 32|
 // buffer player
 SynthDef(\buffPlayer, {|out=0, bufnum = 0, loop = 0, amp = 0.7,  pan = 0|
 	var sig = Pan2.ar(PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: loop, doneAction: 2), pan)*amp;
-		Out.ar( out, sig);
+	Out.ar( out, sig);
 }).add; // end synth def
 
 // **************************

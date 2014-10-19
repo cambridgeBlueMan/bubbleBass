@@ -16,7 +16,7 @@ theDir.do({|item, i|
 // clock
 
 var myTempo = TempoClock.new(150/60);
-var pKick, pBass, pRolls; // PBinds
+var pKick, pBass, pRolls, pKickLea, pHatLea; // PBinds
 var kicksArray = Array.newClear(4);
 
 // ************************************************************************************
@@ -76,69 +76,88 @@ CmdPeriod.add( {
 //                                 PATTERNS
 // ************************************************************************************
 kicksArray.do({|item, i|
-	kicksArray[i] = ~theKickBuffers.asArray[~theKickBuffers.size.rand.postln]
+	kicksArray[i] = ~buffers["kicks"].asArray[~buffers["kicks"].size.rand.postln]
 });
 kicksArray.postln;
 
 ~aliceBuffers = Pseq([
-	~theBubbleBassBuffers["bubblebassA"].postln,
-	~theBubbleBassBuffers["bubblebassBb"],
-	~theBubbleBassBuffers["bubblebassA"],
-	~theBubbleBassBuffers["bubblebassBb"],
-	~theBubbleBassBuffers["bubblebassC"],
-	~theBubbleBassBuffers["bubblebassEb"],
-	~theBubbleBassBuffers["bubblebassF"],
-	~theBubbleBassBuffers["bubblebassC"]
-	//~theBubbleBassBuffers["bubblebassA"],
-	//~theBubbleBassBuffers["bubblebassA"],
-	//~theBubbleBassBuffers["bubblebassA"],
+	~buffers["licks"]["bubblebassA"].postln,
+	~buffers["licks"]["bubblebassBb"],
+	~buffers["licks"]["bubblebassA"],
+	~buffers["licks"]["bubblebassBb"],
+	~buffers["licks"]["bubblebassC"],
+	~buffers["licks"]["bubblebassEb"],
+	~buffers["licks"]["bubblebassF"],
+	~buffers["licks"]["bubblebassC"]
+	//~buffers["licks"]["bubblebassA"],
+	//~buffers["licks"]["bubblebassA"],
+	//~buffers["licks"]["bubblebassA"],
 
 ], 4);
 ~aliceDurs = Pseq([16,16,16,16,8,4,4,16], inf);
 
 // pattern proxy for the rolls
-~pRollBuffer = PatternProxy.new(~rollBuffers.asArray[1]);
+~pRollBuffer = PatternProxy.new(~buffers["rolls"].asArray[1]);
 // roll Patterns
 ~rollDurA = Pseq([1,1, Rest(3/2) , 1/4, 1/4], 1);
 ~rollDurB = Pseq([3.5, 1/4, 1/4], 1);
 ~rollDurC = Pseq([2,1/4,1/4,1/4,1/4,1/4,1/4, 1/4, 1/4], 1);
 ~compositeRoll1 = Place([
 	~rollDurA, [~rollDurB, ~rollDurC]
-	], 100);
+], 100);
 
-	pKick = Pbind(
-		\instrument, \buffPlayer,
-		\bufnum, Pseq(kicksArray, inf),
-		\dur,  1,
-		\amp, 0.7,
-		\out, chanKick.inbus.index
-	);
-	// bubble bass
-	pBass = Pbind(
-		\instrument, \buffPlayerStereo2,
-		\dur, ~aliceDurs, //16,
-		\bufnum, ~aliceBuffers, //Prand(~theBubbleBassBuffers.asArray, 3),
-		\out, chanBubbleBass.inbus.index
-	);
-	// rolls
-	pRolls = 	Pbind(
-		\instrument, \buffPlayer,
-		\bufnum, ~pRollBuffer,
-		\dur, ~compositeRoll1,
-		\amp, 0.7,
-		\out, chanRoll.inbus.index
-	);
+pKick = Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, Pseq(kicksArray, inf),
+	\dur,  1,
+	\amp, 0.7,
+	\out, chanKick.inbus.index
+);
+
+// leas kick drum
+
+pKickLea = Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, ~buffers["kicks"]["leasOrigKick"],
+	\dur,  1,
+	\amp, 0.7,
+	\out, chanKick.inbus.index
+);
+pHatLea = Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, ~buffers["kicks"]["leasOrigOhh"],
+	\dur,  Pseq([Rest(1), 1], inf),
+	\amp, 0.7,
+	\out, chanKick.inbus.index
+);
+// bubble bass
+pBass = Pbind(
+	\instrument, \buffPlayerStereo2,
+	\dur, ~aliceDurs, //16,
+	\bufnum, ~aliceBuffers, //Prand(~buffers["licks"].asArray, 3),
+	\out, chanBubbleBass.inbus.index
+);
+// rolls
+pRolls = 	Pbind(
+	\instrument, \buffPlayer,
+	\bufnum, ~pRollBuffer,
+	\dur, ~compositeRoll1,
+	\amp, 0.7,
+	\out, chanRoll.inbus.index
+);
 
 
 
-	SystemClock.sched(2, {
-		Ppar([
-			/*pKick,*/
-			pBass,
-			pRolls
-		]).play(myTempo);
+SystemClock.sched(2, {
+	Ppar([
+		/*pKick,*/
+		pKickLea,
+		pHatLea,
+		pBass,
+		pRolls
+	]).play(myTempo);
 
-	}); // end clock
+}); // end clock
 )
 
 
